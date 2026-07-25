@@ -1,0 +1,38 @@
+{
+  "name": "shopsphere-backend",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "seed": "node prisma/seed.js",
+    "studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "ShopSphere e-commerce API (Express + Prisma + PostgreSQL)",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.9.0",
+    "@prisma/client": "^7.9.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3",
+    "pdfkit": "^0.19.1",
+    "pg": "^8.22.0",
+    "stripe": "^22.3.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "nodemon": "^3.1.14",
+    "prisma": "^7.9.0"
+  }
+}
