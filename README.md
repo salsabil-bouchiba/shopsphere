@@ -25,11 +25,8 @@ Plateforme e-commerce full-stack moderne — catalogue produits, panier, favoris
 
 ## 📸 Aperçu
 
-> Ajoute tes captures dans `docs/screenshots/` puis décommente les images ci-dessous.
-
 <div align="center">
 
-<!--
 <img src="docs/screenshots/home.png" alt="Page d'accueil ShopSphere" width="800"/>
 <p><em>Page d'accueil — hero carrousel & offres</em></p>
 
@@ -38,11 +35,10 @@ Plateforme e-commerce full-stack moderne — catalogue produits, panier, favoris
 
 <img src="docs/screenshots/product.png" alt="Fiche produit" width="800"/>
 <p><em>Fiche produit — galerie & avis</em></p>
--->
-
-<p><em>Astuce : lance le projet en local, capture Home / Catalogue / Produit, place les PNG dans <code>docs/screenshots/</code>.</em></p>
 
 </div>
+
+> Pour régénérer les captures : backend + frontend lancés, puis `cd frontend && npm run screenshots`.
 
 ---
 
