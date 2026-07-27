@@ -1,9 +1,6 @@
 const prisma = require("../config/prisma");
 const { asyncHandler } = require("../middleware/asyncHandler");
 
-/**
- * POST /api/reviews — avis uniquement si le produit a été acheté (commande PAID+)
- */
 const createReview = asyncHandler(async (req, res) => {
   const { productId, rating, comment } = req.body;
 

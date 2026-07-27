@@ -1,12 +1,6 @@
 const prisma = require("../config/prisma");
 const { asyncHandler } = require("../middleware/asyncHandler");
 
-/**
- * Recommandations V1 (règle métier simple, pas de ML) :
- * 1. Si user connecté avec historique d'achats → produits populaires des mêmes catégories (hors déjà achetés)
- * 2. Sinon / fallback → produits les mieux notés / plus vendus
- * 3. Si productId fourni → similaires dans la même catégorie
- */
 const getRecommendations = asyncHandler(async (req, res) => {
   const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 8));
   const { productId } = req.query;
@@ -47,7 +41,6 @@ const getRecommendations = asyncHandler(async (req, res) => {
       const boughtIds = [...new Set(purchased.map((i) => i.productId))];
       const categoryIds = [...new Set(purchased.map((i) => i.product.categoryId))];
 
-      // Popularité = quantité vendue dans ces catégories
       const popularInCats = await prisma.orderItem.groupBy({
         by: ["productId"],
         where: {
@@ -71,7 +64,6 @@ const getRecommendations = asyncHandler(async (req, res) => {
         products = found.sort((a, b) => orderMap[a.id] - orderMap[b.id]);
       }
 
-      // Compléter avec d'autres produits de la catégorie si besoin
       if (products.length < limit) {
         const extra = await prisma.product.findMany({
           where: {
@@ -92,7 +84,6 @@ const getRecommendations = asyncHandler(async (req, res) => {
     }
   }
 
-  // Fallback : top ventes globales
   const top = await prisma.orderItem.groupBy({
     by: ["productId"],
     where: { order: { status: { in: ["PAID", "SHIPPED", "DELIVERED"] } } },

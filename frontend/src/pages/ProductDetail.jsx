@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../api/client";
 import ProductCard from "../components/ProductCard";
 import { useAuth } from "../context/AuthContext";
+import { useProductActions } from "../hooks/useProductActions";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { addToCart, addToWishlist, handleAddCart, handleAddWish } = useProductActions();
   const [product, setProduct] = useState(null);
   const [similar, setSimilar] = useState([]);
   const [qty, setQty] = useState(1);
@@ -20,43 +22,41 @@ export default function ProductDetail() {
   const [message, setMessage] = useState("");
   const [cartState, setCartState] = useState("idle");
 
-  async function load() {
+  const loadProduct = useCallback(async () => {
     const { data } = await api.get(`/products/${id}`);
     setProduct(data.product);
     setActiveImg(0);
     const rec = await api.get(`/recommendations?productId=${id}&limit=6`);
     setSimilar(rec.data.products);
-  }
+  }, [id]);
 
   useEffect(() => {
     setProduct(null);
-    load();
-  }, [id]);
+    loadProduct();
+  }, [loadProduct]);
 
   const images = useMemo(() => {
     if (!product) return [];
-    const list = product.images?.length ? product.images : ["https://placehold.co/900x900?text=ShopSphere"];
-    return list;
+    return product.images?.length
+      ? product.images
+      : ["https://placehold.co/900x900?text=ShopSphere"];
   }, [product]);
 
-  async function addCart(productOrNull) {
-    if (!user) return alert(t("common.loginRequired"));
-    const productId = productOrNull?.id || id;
-    const quantity = productOrNull?.id ? 1 : qty;
-    if (!productOrNull) setCartState("loading");
-    await api.post("/cart/items", { productId, quantity });
-    if (!productOrNull) {
-      setCartState("success");
-      setMessage(t("products.added"));
-      setTimeout(() => setCartState("idle"), 1400);
+  async function addCurrentToCart() {
+    setCartState("loading");
+    const ok = await addToCart(id, qty);
+    if (!ok) {
+      setCartState("idle");
+      return;
     }
+    setCartState("success");
+    setMessage(t("products.added"));
+    setTimeout(() => setCartState("idle"), 1400);
   }
 
-  async function addWish(productOrNull) {
-    if (!user) return alert(t("common.loginRequired"));
-    const productId = productOrNull?.id || id;
-    await api.post("/wishlist/items", { productId });
-    setMessage(t("products.addWish"));
+  async function addCurrentToWishlist() {
+    const ok = await addToWishlist(id);
+    if (ok) setMessage(t("products.addWish"));
   }
 
   async function submitReview(e) {
@@ -64,7 +64,7 @@ export default function ProductDetail() {
     try {
       await api.post("/reviews", { productId: id, rating: Number(rating), comment });
       setComment("");
-      await load();
+      await loadProduct();
       setMessage(t("product.writeReview"));
     } catch (err) {
       setMessage(err.response?.data?.message || t("common.error"));
@@ -168,7 +168,7 @@ export default function ProductDetail() {
               className={`btn btn-primary ${cartState === "loading" ? "loading" : ""} ${
                 cartState === "success" ? "success-flash" : ""
               }`}
-              onClick={() => addCart()}
+              onClick={addCurrentToCart}
               disabled={product.stock <= 0 || cartState === "loading"}
             >
               {cartState === "loading"
@@ -177,7 +177,7 @@ export default function ProductDetail() {
                   ? t("products.added")
                   : t("products.addCart")}
             </button>
-            <button className="btn btn-secondary" onClick={() => addWish()}>
+            <button className="btn btn-secondary" onClick={addCurrentToWishlist}>
               ♥ {t("products.addWish")}
             </button>
           </div>
@@ -263,8 +263,13 @@ export default function ProductDetail() {
           <h2>{t("product.similar")}</h2>
         </div>
         <div className="product-rail">
-          {similar.map((p) => (
-            <ProductCard key={p.id} product={p} onAddCart={addCart} onAddWish={addWish} />
+          {similar.map((item) => (
+            <ProductCard
+              key={item.id}
+              product={item}
+              onAddCart={handleAddCart}
+              onAddWish={handleAddWish}
+            />
           ))}
         </div>
       </section>

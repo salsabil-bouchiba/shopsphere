@@ -95,8 +95,7 @@ textarea {
 h1,
 h2,
 h3,
-h4,
-.brand-font {
+h4 {
   font-family: "Fraunces", Georgia, serif;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -722,14 +721,6 @@ h4,
   font-weight: 700;
   color: var(--secondary);
   font-variant-numeric: tabular-nums;
-}
-
-.price-old {
-  color: var(--muted);
-  text-decoration: line-through;
-  font-weight: 500;
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
 }
 
 .muted {

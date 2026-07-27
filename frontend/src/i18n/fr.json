@@ -105,6 +105,7 @@
     "lineTotal": "Total ligne",
     "promo": "Code promo",
     "promoApply": "Appliquer",
+    "promoUnavailable": "Les codes promo ne sont pas encore disponibles.",
     "address": "Adresse de livraison",
     "summary": "Récapitulatif"
   },

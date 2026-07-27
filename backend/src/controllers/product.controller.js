@@ -3,10 +3,6 @@ const env = require("../config/env");
 const { asyncHandler } = require("../middleware/asyncHandler");
 const { sendMail, lowStockEmail } = require("../services/mail.service");
 
-/**
- * Construit le filtre Prisma à partir des query params :
- * search, categoryId, minPrice, maxPrice, inStock, page, limit, sort
- */
 function buildProductFilters(query) {
   const where = {};
 
@@ -132,7 +128,6 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  // Images : tableau d'URLs depuis le body, ou fichiers uploadés via multer
   let imageUrls = Array.isArray(images) ? images : images ? [images] : [];
   if (req.files?.length) {
     imageUrls = [
@@ -192,9 +187,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
   res.json({ message: "Produit supprimé" });
 });
 
-/**
- * GET /api/products/inventory/low-stock — admin : produits sous le seuil
- */
 const lowStockProducts = asyncHandler(async (_req, res) => {
   const products = await prisma.product.findMany({
     where: { stock: { lte: env.lowStockThreshold } },
@@ -204,9 +196,6 @@ const lowStockProducts = asyncHandler(async (_req, res) => {
   res.json({ threshold: env.lowStockThreshold, products });
 });
 
-/**
- * PATCH /api/products/:id/stock — admin : ajustement manuel du stock
- */
 const adjustStock = asyncHandler(async (req, res) => {
   const { stock, delta } = req.body;
 

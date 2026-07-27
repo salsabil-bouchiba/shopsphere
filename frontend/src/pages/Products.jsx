@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import api from "../api/client";
 import ProductCard from "../components/ProductCard";
 import EmptyState from "../components/EmptyState";
-import { useAuth } from "../context/AuthContext";
+import { useProductActions } from "../hooks/useProductActions";
 
 export default function Products() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { handleAddCart, handleAddWish } = useProductActions();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -31,8 +31,8 @@ export default function Products() {
   useEffect(() => {
     const search = searchParams.get("search") || "";
     const categoryId = searchParams.get("categoryId") || "";
-    setFilters((f) => ({
-      ...f,
+    setFilters((prev) => ({
+      ...prev,
       search,
       categoryId,
       page: 1,
@@ -50,8 +50,6 @@ export default function Products() {
     if (filters.categoryId) params.set("categoryId", filters.categoryId);
     if (filters.inStock) params.set("inStock", filters.inStock);
 
-    // Backend uses maxPrice via maxPrice query — our API uses maxPrice in product controller as maxPrice
-    // Checking: buildProductFilters uses maxPrice — good
     api
       .get(`/products?${params}`)
       .then((res) => {
@@ -61,20 +59,10 @@ export default function Products() {
       .finally(() => setLoading(false));
   }, [filters]);
 
-  async function addCart(product) {
-    if (!user) return alert(t("common.loginRequired"));
-    await api.post("/cart/items", { productId: product.id, quantity: 1 });
-  }
-
-  async function addWish(product) {
-    if (!user) return alert(t("common.loginRequired"));
-    await api.post("/wishlist/items", { productId: product.id });
-  }
-
-  function setCategory(id) {
-    setFilters((f) => ({ ...f, categoryId: id, page: 1 }));
+  function setCategory(categoryId) {
+    setFilters((prev) => ({ ...prev, categoryId, page: 1 }));
     const next = new URLSearchParams(searchParams);
-    if (id) next.set("categoryId", id);
+    if (categoryId) next.set("categoryId", categoryId);
     else next.delete("categoryId");
     setSearchParams(next);
   }
@@ -109,18 +97,22 @@ export default function Products() {
           <input
             placeholder={t("products.search")}
             value={filters.search}
-            onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value, page: 1 }))}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, search: e.target.value, page: 1 }))
+            }
           />
           <select
             value={filters.inStock}
-            onChange={(e) => setFilters((f) => ({ ...f, inStock: e.target.value, page: 1 }))}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, inStock: e.target.value, page: 1 }))
+            }
           >
             <option value="">Stock</option>
             <option value="true">{t("products.inStock")}</option>
           </select>
           <select
             value={filters.sort}
-            onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
+            onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
           >
             <option value="newest">{t("products.newest")}</option>
             <option value="price_asc">{t("products.priceAsc")}</option>
@@ -136,14 +128,14 @@ export default function Products() {
           >
             {t("products.allCategories")}
           </button>
-          {categories.map((c) => (
+          {categories.map((category) => (
             <button
-              key={c.id}
+              key={category.id}
               type="button"
-              className={`chip ${filters.categoryId === c.id ? "active" : ""}`}
-              onClick={() => setCategory(c.id)}
+              className={`chip ${filters.categoryId === category.id ? "active" : ""}`}
+              onClick={() => setCategory(category.id)}
             >
-              {c.name}
+              {category.name}
             </button>
           ))}
         </div>
@@ -159,7 +151,11 @@ export default function Products() {
             step="10"
             value={filters.maxPrice}
             onChange={(e) =>
-              setFilters((f) => ({ ...f, maxPrice: Number(e.target.value), page: 1 }))
+              setFilters((prev) => ({
+                ...prev,
+                maxPrice: Number(e.target.value),
+                page: 1,
+              }))
             }
           />
         </div>
@@ -180,8 +176,13 @@ export default function Products() {
         />
       ) : (
         <div className={`grid ${view === "list" ? "list-view" : ""}`}>
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} onAddCart={addCart} onAddWish={addWish} />
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddCart={handleAddCart}
+              onAddWish={handleAddWish}
+            />
           ))}
         </div>
       )}
@@ -190,7 +191,7 @@ export default function Products() {
         <button
           className="btn"
           disabled={filters.page <= 1}
-          onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}
+          onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
         >
           ←
         </button>
@@ -200,7 +201,7 @@ export default function Products() {
         <button
           className="btn"
           disabled={filters.page >= pagination.totalPages}
-          onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
+          onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
         >
           →
         </button>

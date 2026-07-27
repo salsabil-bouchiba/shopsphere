@@ -1,0 +1,24 @@
+# Dépendances & secrets — NE PAS ignorer docs/screenshots/*.png
+node_modules/
+.env
+.env.*
+!.env.example
+
+backend/node_modules/
+backend/uploads/
+backend/.env
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+backend/.agents/
+backend/skills-lock.json
+
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Les captures README doivent être versionnées :
+# docs/screenshots/*.png  → OK à commit

@@ -15,7 +15,6 @@ module.exports = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   lowStockThreshold: Number(process.env.LOW_STOCK_THRESHOLD) || 5,
-  // SMTP (Ethereal / Gmail). Si absent → emails loggés en console (mode dev).
   smtp: {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT) || 587,
@@ -24,5 +23,4 @@ module.exports = {
     from: process.env.SMTP_FROM || "ShopSphere <noreply@shopsphere.local>",
   },
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || "",
-  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
 };

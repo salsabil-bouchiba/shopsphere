@@ -178,7 +178,11 @@ export default function Cart() {
                 value={promo}
                 onChange={(e) => setPromo(e.target.value)}
               />
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMessage(promo ? "OK" : "")}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setMessage(t("cart.promoUnavailable"))}
+              >
                 {t("cart.promoApply")}
               </button>
             </div>

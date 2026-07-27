@@ -23,10 +23,6 @@ function publicUser(user) {
   };
 }
 
-/**
- * POST /api/auth/register
- * Crée un User + Cart + Wishlist vides, hash le mot de passe, envoie un email de bienvenue.
- */
 const register = asyncHandler(async (req, res) => {
   const { email, password, name } = req.body;
 
@@ -54,7 +50,6 @@ const register = asyncHandler(async (req, res) => {
     },
   });
 
-  // Email non-bloquant
   sendMail(welcomeEmail(user));
 
   const token = signToken(user);
@@ -65,9 +60,6 @@ const register = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * POST /api/auth/login
- */
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -92,9 +84,6 @@ const login = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * GET /api/auth/me — profil de l'utilisateur connecté
- */
 const me = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });

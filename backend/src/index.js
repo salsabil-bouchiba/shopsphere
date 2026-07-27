@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -29,7 +27,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", service: "shopsphere-api", time: new Date().toISOString() });
+  res.json({
+    status: "ok",
+    service: "shopsphere-api",
+    time: new Date().toISOString(),
+  });
 });
 
 app.use("/api/auth", authRoutes);
@@ -45,5 +47,7 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
-  console.log(`ShopSphere API running on http://localhost:${env.port}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`ShopSphere API running on http://localhost:${env.port}`);
+  }
 });

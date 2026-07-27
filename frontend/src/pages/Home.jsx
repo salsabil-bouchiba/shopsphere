@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../api/client";
 import ProductCard from "../components/ProductCard";
 import HeroCarousel from "../components/HeroCarousel";
-import { useAuth } from "../context/AuthContext";
+import { useProductActions } from "../hooks/useProductActions";
 
 const CATEGORY_IMAGES = {
   Mode: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&q=80",
@@ -13,9 +13,11 @@ const CATEGORY_IMAGES = {
   default: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80",
 };
 
+const TRUST_ICONS = ["🚚", "🔒", "↺", "💬"];
+
 export default function Home() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { handleAddCart, handleAddWish } = useProductActions();
   const [featured, setFeatured] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -26,16 +28,6 @@ export default function Home() {
     api.get("/recommendations?limit=8").then((res) => setRecommended(res.data.products));
     api.get("/categories").then((res) => setCategories(res.data.categories));
   }, []);
-
-  async function addCart(product) {
-    if (!user) return alert(t("common.loginRequired"));
-    await api.post("/cart/items", { productId: product.id, quantity: 1 });
-  }
-
-  async function addWish(product) {
-    if (!user) return alert(t("common.loginRequired"));
-    await api.post("/wishlist/items", { productId: product.id });
-  }
 
   function scrollRail(dir) {
     railRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
@@ -75,12 +67,12 @@ export default function Home() {
             </div>
           </div>
           <div className="promo-grid">
-            {promos.map((p) => (
-              <Link key={p.title} to={p.to} className="promo-card">
-                <img src={p.img} alt="" />
+            {promos.map((promo) => (
+              <Link key={promo.title} to={promo.to} className="promo-card">
+                <img src={promo.img} alt="" />
                 <div>
-                  <h3>{p.title}</h3>
-                  <p>{p.text}</p>
+                  <h3>{promo.title}</h3>
+                  <p>{promo.text}</p>
                 </div>
               </Link>
             ))}
@@ -104,8 +96,13 @@ export default function Home() {
               ‹
             </button>
             <div className="product-rail" ref={railRef}>
-              {featured.map((p) => (
-                <ProductCard key={p.id} product={p} onAddCart={addCart} onAddWish={addWish} />
+              {featured.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddCart={handleAddCart}
+                  onAddWish={handleAddWish}
+                />
               ))}
             </div>
             <button type="button" className="rail-btn next" onClick={() => scrollRail(1)}>
@@ -121,14 +118,17 @@ export default function Home() {
             <h2>{t("home.categories")}</h2>
           </div>
           <div className="category-grid">
-            {categories.map((c) => (
+            {categories.map((category) => (
               <Link
-                key={c.id}
-                to={`/products?categoryId=${c.id}`}
+                key={category.id}
+                to={`/products?categoryId=${category.id}`}
                 className="category-tile"
               >
-                <img src={CATEGORY_IMAGES[c.name] || CATEGORY_IMAGES.default} alt="" />
-                <span>{c.name}</span>
+                <img
+                  src={CATEGORY_IMAGES[category.name] || CATEGORY_IMAGES.default}
+                  alt=""
+                />
+                <span>{category.name}</span>
               </Link>
             ))}
           </div>
@@ -141,8 +141,13 @@ export default function Home() {
             <h2>{t("home.recommended")}</h2>
           </div>
           <div className="grid">
-            {recommended.slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p} onAddCart={addCart} onAddWish={addWish} />
+            {recommended.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddCart={handleAddCart}
+                onAddWish={handleAddWish}
+              />
             ))}
           </div>
         </div>
@@ -156,7 +161,7 @@ export default function Home() {
           <div className="trust-grid">
             {[1, 2, 3, 4].map((n) => (
               <div key={n} className="trust-item">
-                <div className="icon">{["🚚", "🔒", "↺", "💬"][n - 1]}</div>
+                <div className="icon">{TRUST_ICONS[n - 1]}</div>
                 <h3>{t(`home.trust${n}Title`)}</h3>
                 <p>{t(`home.trust${n}Text`)}</p>
               </div>

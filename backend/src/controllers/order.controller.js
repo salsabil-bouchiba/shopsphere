@@ -55,10 +55,6 @@ async function generateInvoicePdf(order) {
   return `/uploads/invoices/invoice-${order.id}.pdf`;
 }
 
-/**
- * Crée une commande à partir du panier (transaction atomique + décrément stock).
- * POST /api/orders
- */
 const createOrder = asyncHandler(async (req, res) => {
   const { shippingAddress, paymentMethod = "stripe" } = req.body;
 
@@ -145,10 +141,6 @@ const createOrder = asyncHandler(async (req, res) => {
   res.status(201).json({ order, payment });
 });
 
-/**
- * Confirme le paiement Stripe côté serveur (après succès client).
- * POST /api/orders/:id/confirm-payment
- */
 const confirmPayment = asyncHandler(async (req, res) => {
   const order = await prisma.order.findUnique({
     where: { id: req.params.id },
@@ -228,7 +220,6 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   });
   if (!existing) return res.status(404).json({ message: "Commande introuvable" });
 
-  // Restauration du stock si annulation depuis un statut non annulé
   if (status === "CANCELLED" && existing.status !== "CANCELLED") {
     await prisma.$transaction(async (tx) => {
       for (const item of existing.items) {
@@ -292,5 +283,4 @@ module.exports = {
   getOrder,
   updateOrderStatus,
   downloadInvoice,
-  generateInvoicePdf,
 };

@@ -172,10 +172,12 @@ LOW_STOCK_THRESHOLD=5
 
 # Optionnel — Stripe test (https://dashboard.stripe.com/test/apikeys)
 STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
+# STRIPE_WEBHOOK_SECRET=   # pas encore branché (roadmap)
 ```
 
 > **Prisma 7 :** `DATABASE_URL` est lu via `prisma.config.ts` (pas dans le bloc `datasource` de `schema.prisma`).
+
+> `NODE_ENV=production` désactive les logs de démarrage / Ethereal verbeux.
 
 ### `frontend/.env`
 
@@ -196,12 +198,12 @@ ShopSphere/
 │   │   ├── api/              # Axios client
 │   │   ├── components/       # UI (Navbar, Footer, ProductCard…)
 │   │   ├── context/          # AuthContext, ThemeContext
+│   │   ├── hooks/            # useProductActions
 │   │   ├── i18n/             # fr.json / en.json
 │   │   ├── pages/            # Home, Products, Cart, Admin…
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css         # Design system
-│   ├── .env
 │   └── package.json
 │
 ├── backend/                  # API Express
@@ -219,11 +221,11 @@ ShopSphere/
 │   │   └── index.js          # Point d'entrée
 │   ├── uploads/              # Images & factures
 │   ├── prisma.config.ts
-│   ├── .env
 │   └── package.json
 │
 ├── docs/
 │   └── screenshots/          # Captures pour le README
+├── LICENSE
 └── README.md
 ```
 

@@ -1,9 +1,6 @@
 const jwt = require("jsonwebtoken");
 const env = require("../config/env");
 
-/**
- * Vérifie le Bearer JWT et attache req.user = { id, email, role }.
- */
 function authMiddleware(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
@@ -20,10 +17,6 @@ function authMiddleware(req, res, next) {
   }
 }
 
-/**
- * Doit être utilisé APRÈS authMiddleware.
- * Autorise uniquement le rôle ADMIN.
- */
 function adminMiddleware(req, res, next) {
   if (!req.user || req.user.role !== "ADMIN") {
     return res.status(403).json({ message: "Accès réservé aux administrateurs" });
@@ -31,10 +24,6 @@ function adminMiddleware(req, res, next) {
   return next();
 }
 
-/**
- * Auth optionnelle : si un token est présent et valide, remplit req.user.
- * Utile pour des routes publiques enrichies (ex: recommandations).
- */
 function optionalAuth(req, _res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) return next();
@@ -43,7 +32,7 @@ function optionalAuth(req, _res, next) {
     const payload = jwt.verify(header.slice(7), env.jwtSecret);
     req.user = { id: payload.id, email: payload.email, role: payload.role };
   } catch {
-    // ignore invalid token on optional routes
+    // Invalid token on optional routes is ignored
   }
   return next();
 }

@@ -1,13 +1,9 @@
 const nodemailer = require("nodemailer");
 const env = require("../config/env");
 
+const isDev = process.env.NODE_ENV !== "production";
 let transporterPromise = null;
 
-/**
- * Crée un transporteur SMTP.
- * - Si SMTP_* est défini → utilise ce serveur (Gmail, Mailtrap, etc.)
- * - Sinon → compte Ethereal éphémère (preview URL dans la console)
- */
 async function getTransporter() {
   if (transporterPromise) return transporterPromise;
 
@@ -22,7 +18,9 @@ async function getTransporter() {
     }
 
     const testAccount = await nodemailer.createTestAccount();
-    console.log("[mail] Ethereal account created:", testAccount.user);
+    if (isDev) {
+      console.log("[mail] Ethereal account created:", testAccount.user);
+    }
     return nodemailer.createTransport({
       host: "smtp.ethereal.email",
       port: 587,
@@ -46,12 +44,11 @@ async function sendMail({ to, subject, html, text }) {
     });
 
     const preview = nodemailer.getTestMessageUrl(info);
-    if (preview) {
+    if (preview && isDev) {
       console.log(`[mail] Preview URL: ${preview}`);
     }
     return info;
   } catch (err) {
-    // Ne bloque jamais le flux métier si l'email échoue
     console.error("[mail] Failed to send:", err.message);
     return null;
   }

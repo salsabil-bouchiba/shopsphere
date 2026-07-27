@@ -3,6 +3,8 @@ const PDFDocument = require("pdfkit");
 const prisma = require("../config/prisma");
 const { asyncHandler } = require("../middleware/asyncHandler");
 
+const PAID_STATUSES = ["PAID", "SHIPPED", "DELIVERED"];
+
 const listUsers = asyncHandler(async (_req, res) => {
   const users = await prisma.user.findMany({
     select: {
@@ -32,26 +34,21 @@ const listOrders = asyncHandler(async (req, res) => {
   res.json({ orders });
 });
 
-/**
- * Dashboard ventes : CA, nb commandes, top produits
- */
 const salesDashboard = asyncHandler(async (_req, res) => {
-  const paidStatuses = ["PAID", "SHIPPED", "DELIVERED"];
-
   const [revenueAgg, orderCount, pendingCount, productCount, userCount, topProducts] =
     await Promise.all([
       prisma.order.aggregate({
-        where: { status: { in: paidStatuses } },
+        where: { status: { in: PAID_STATUSES } },
         _sum: { total: true },
         _avg: { total: true },
       }),
-      prisma.order.count({ where: { status: { in: paidStatuses } } }),
+      prisma.order.count({ where: { status: { in: PAID_STATUSES } } }),
       prisma.order.count({ where: { status: "PENDING" } }),
       prisma.product.count(),
       prisma.user.count(),
       prisma.orderItem.groupBy({
         by: ["productId"],
-        where: { order: { status: { in: paidStatuses } } },
+        where: { order: { status: { in: PAID_STATUSES } } },
         _sum: { quantity: true },
         _count: { _all: true },
         orderBy: { _sum: { quantity: "desc" } },
@@ -83,17 +80,13 @@ const salesDashboard = asyncHandler(async (_req, res) => {
   });
 });
 
-/**
- * Analytics : ventes par jour (30j) + top catégories
- */
 const analytics = asyncHandler(async (_req, res) => {
-  const paidStatuses = ["PAID", "SHIPPED", "DELIVERED"];
   const since = new Date();
   since.setDate(since.getDate() - 30);
 
   const orders = await prisma.order.findMany({
     where: {
-      status: { in: paidStatuses },
+      status: { in: PAID_STATUSES },
       createdAt: { gte: since },
     },
     select: { total: true, createdAt: true },
@@ -109,7 +102,7 @@ const analytics = asyncHandler(async (_req, res) => {
   }
 
   const items = await prisma.orderItem.findMany({
-    where: { order: { status: { in: paidStatuses } } },
+    where: { order: { status: { in: PAID_STATUSES } } },
     include: { product: { include: { category: true } } },
   });
 

@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-/** Layout partagé pour les pages légales / info (About, Contact, CGV, FAQ). */
 export default function InfoPage({ titleKey, children }) {
   const { t } = useTranslation();
 
